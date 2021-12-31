@@ -1,31 +1,28 @@
 <template>
-  <div class="game" ref="game"></div>
+  <canvas class="game" ref="game"></canvas>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import * as PIXI from "pixi.js";
+import { Game } from "@/scripts/game";
 import GAME from "../config/game";
 
 @Options({})
-export default class Game extends Vue {
+export default class GameComponent extends Vue {
   mounted(): void {
-    this.init();
+    this.Game = new Game(this.game, GAME.stage);
   }
+
+  /**
+   * 游戏实例
+   */
+  Game: Game | undefined;
 
   /**
    * PIXI DOM容器
    */
-  private get game(): HTMLElement {
-    return this.$refs.game as HTMLElement;
-  }
-
-  /**
-   * 初始化PIXI
-   */
-  private init() {
-    const app = new PIXI.Application(GAME.stage);
-    this.game.appendChild(app.view);
+  private get game(): HTMLCanvasElement {
+    return this.$refs.game as HTMLCanvasElement;
   }
 }
 </script>

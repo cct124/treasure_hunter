@@ -1,7 +1,17 @@
+export interface StageConfig {
+  width: number;
+  height: number;
+  backgroundColor: number;
+}
+
+export interface GameConfig {
+  stage: StageConfig;
+}
+
 /**
  * 游戏配置信息
  */
-export default {
+const GAME: GameConfig = {
   /**
    * 舞台信息
    */
@@ -11,3 +21,5 @@ export default {
     backgroundColor: 0x282c34,
   },
 };
+
+export default GAME;
