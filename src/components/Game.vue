@@ -6,13 +6,10 @@
 import { Options, Vue } from "vue-class-component";
 import { Game } from "@/scripts/game";
 import GAME from "../config/game";
+import * as PIXI from "pixi.js";
 
 @Options({})
 export default class GameComponent extends Vue {
-  mounted(): void {
-    this.Game = new Game(this.game, GAME.stage);
-  }
-
   /**
    * 游戏实例
    */
@@ -23,6 +20,20 @@ export default class GameComponent extends Vue {
    */
   private get game(): HTMLCanvasElement {
     return this.$refs.game as HTMLCanvasElement;
+  }
+
+  /**
+   * 初始化游戏实例
+   */
+  init(loader: PIXI.Loader): Game {
+    this.Game = new Game(this.game, {
+      ...GAME.stage,
+      resource: loader.resources,
+      assets: GAME.assets,
+      spriteNames: GAME.spriteNames,
+      monsterNum: 6,
+    });
+    return this.Game;
   }
 }
 </script>
