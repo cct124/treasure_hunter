@@ -15,6 +15,9 @@ export interface AssetsItem {
 export interface SpriteNames {
   dungeon: AssetsConfig;
   blob: AssetsConfig;
+  explorer: AssetsConfig;
+  treasure: AssetsConfig;
+  door: AssetsConfig;
 }
 
 export interface GameConfig {
@@ -41,6 +44,9 @@ export enum AssetsConfig {
   treasureHunter = "treasure_hunter",
   dungeon = "dungeon.png",
   blob = "blob.png",
+  explorer = "explorer.png",
+  treasure = "treasure.png",
+  door = "door.png",
 }
 
 /**
@@ -56,6 +62,9 @@ const GAME: GameConfig = {
   spriteNames: {
     dungeon: AssetsConfig.dungeon,
     blob: AssetsConfig.blob,
+    explorer: AssetsConfig.explorer,
+    treasure: AssetsConfig.treasure,
+    door: AssetsConfig.door,
   },
   stage: {
     width: 512,

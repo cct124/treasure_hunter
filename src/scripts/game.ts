@@ -46,6 +46,10 @@ export interface HealthBar {
   redBar: PIXI.Graphics;
 }
 
+export interface Message {
+  full?: PIXI.Text;
+}
+
 /**
  * 游戏主类
  */
@@ -73,13 +77,18 @@ export class Game {
    */
   gameScene = new PIXI.Container();
   /**
-   * 游戏信息容器
+   * 游戏UI容器
    */
   gameUIScene = new PIXI.Container();
+
+  /**
+   * 游戏消息容器
+   */
+  gameMessage = new PIXI.Container();
   /**
    * 地牢
    */
-  dungeon: PIXI.Sprite | undefined;
+  dungeon: PIXI.Sprite;
 
   mainTextures: {
     [name: string]: PIXI.Texture<PIXI.Resource>;
@@ -97,10 +106,36 @@ export class Game {
     direction: 1,
   };
 
+  /**
+   * 血条
+   */
   healthBar = {
     container: new PIXI.Container(),
     grapBar: new PIXI.Graphics(),
   };
+
+  /**
+   * 游戏消息
+   */
+  messages: Message = {
+    full: undefined,
+  };
+
+  player: Player | undefined;
+
+  /**
+   * 出口
+   */
+  door: PIXI.Sprite;
+  /**
+   * 宝箱
+   */
+  treasure: PIXI.Sprite;
+
+  /**
+   * 墙的厚度
+   */
+  wallThickness = 30;
 
   constructor(ref: HTMLCanvasElement, cfg: GameConfig) {
     this.ref = ref;
@@ -111,22 +146,33 @@ export class Game {
     this.monster.monsterNum = cfg.monsterNum;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mainTextures = this.resource[this.assets.main.name].textures!;
-    this.createGameScene();
-    this.createMonster(this.mainTextures[this.spriteNames.blob]);
-    this.createHealthBar();
-  }
-
-  /**
-   * 创建游戏场景
-   */
-  private createGameScene() {
     /**
      * 创建地牢
      */
     this.dungeon = new PIXI.Sprite(this.mainTextures[this.spriteNames.dungeon]);
+    this.door = new PIXI.Sprite(this.mainTextures[this.spriteNames.door]);
+    this.door.position.set(this.wallThickness, 0);
+    this.treasure = new PIXI.Sprite(
+      this.mainTextures[this.spriteNames.treasure]
+    );
+    console.log(this.app);
+
+    this.treasure.position.set(
+      this.app.view.width - this.treasure.width - this.wallThickness,
+      this.app.view.height / 2 - this.treasure.height / 2
+    );
+
     this.app.stage.addChild(this.gameScene);
     this.app.stage.addChild(this.gameUIScene);
     this.gameScene.addChild(this.dungeon);
+    this.gameScene.addChild(this.door);
+    this.gameScene.addChild(this.treasure);
+    this.gameUIScene.addChild(this.gameMessage);
+
+    this.createMonster(this.mainTextures[this.spriteNames.blob]);
+    this.createHealthBar();
+    this.createMessage();
+    this.createPlayer(this.mainTextures[this.spriteNames.explorer]);
   }
 
   /**
@@ -138,7 +184,10 @@ export class Game {
     for (const i of genArr(0, this.monster.monsterNum)) {
       const monster = new Monster({ textures, id: i });
       const x = this.monster.spacing * i + this.monster.xOffset;
-      const y = randomNum(0, this.app.stage.height - monster.sprite.height);
+      const y = randomNum(
+        this.wallThickness,
+        this.app.stage.height - monster.sprite.height - this.wallThickness
+      );
       monster.move(x, y);
       this.monster.list.push(monster);
       this.gameScene.addChild(monster.sprite);
@@ -174,6 +223,35 @@ export class Game {
   }
 
   /**
+   * 创建游戏信息
+   */
+  private createMessage() {
+    const style = new PIXI.TextStyle({
+      fontFamily: "Futura",
+      fontSize: 64,
+      fill: "white",
+    });
+    this.messages.full = new PIXI.Text("The End!", style);
+    this.messages.full.x = 120;
+    this.messages.full.y = this.app.stage.height / 2 - 32;
+    this.messages.full.visible = false;
+    this.gameMessage.addChild(this.messages.full);
+  }
+
+  /**
+   * 创建玩家
+   * @param textures
+   */
+  private createPlayer(textures: PIXI.Texture<PIXI.Resource>) {
+    this.player = new Player({ textures, id: 0 });
+    this.player.sprite.position.set(
+      this.wallThickness,
+      this.app.view.height / 2 - this.player.sprite.height / 2
+    );
+    this.gameScene.addChild(this.player.sprite);
+  }
+
+  /**
    * 适配容器宽高
    * @param container 容器
    * @param target 目标元素
@@ -194,13 +272,10 @@ export class Game {
   }
 }
 
-/**
- * 怪物
- */
-export class Monster {
+export class Animal {
   sprite: PIXI.Sprite;
   /**
-   * 怪物的唯一标识
+   * 对象的唯一标识
    */
   id: number;
   constructor({
@@ -215,7 +290,7 @@ export class Monster {
   }
 
   /**
-   * 移动怪物
+   * 移动
    * @param x x轴偏移距离
    * @param y y轴偏移距离
    * @returns
@@ -224,5 +299,35 @@ export class Monster {
     this.sprite.x = x;
     this.sprite.y = y;
     return this;
+  }
+}
+
+/**
+ * 怪物
+ */
+export class Monster extends Animal {
+  constructor({
+    textures,
+    id,
+  }: {
+    textures: PIXI.Texture<PIXI.Resource>;
+    id: number;
+  }) {
+    super({ textures, id });
+  }
+}
+
+/**
+ * 玩家
+ */
+export class Player extends Animal {
+  constructor({
+    textures,
+    id,
+  }: {
+    textures: PIXI.Texture<PIXI.Resource>;
+    id: number;
+  }) {
+    super({ textures, id });
   }
 }
