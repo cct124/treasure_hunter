@@ -2,6 +2,14 @@ export interface StageConfig {
   width: number;
   height: number;
   backgroundColor: number;
+  contain: ContainLimit;
+}
+
+export interface ContainLimit {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 /**
@@ -70,6 +78,12 @@ const GAME: GameConfig = {
     width: 512,
     height: 512,
     backgroundColor: 0x282c34,
+    contain: {
+      x: 28,
+      y: 10,
+      width: 488,
+      height: 480,
+    },
   },
 };
 
