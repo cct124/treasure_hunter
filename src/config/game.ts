@@ -63,7 +63,7 @@ export enum AssetsConfig {
 const GAME: GameConfig = {
   assets: {
     main: {
-      path: "./treasure_hunter.json",
+      path: "./assets/treasure_hunter.json",
       name: AssetsConfig.treasureHunter,
     },
   },

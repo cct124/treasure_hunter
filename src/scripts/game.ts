@@ -7,6 +7,7 @@ import {
 } from "@/config/game";
 import { Adaptation } from "@/scripts/adaptation";
 import { genArr, randomNum } from "@/utils";
+import gsap from "gsap";
 
 export interface GameConfig extends StageConfig {
   resource: PIXI.utils.Dict<PIXI.LoaderResource>;
@@ -72,7 +73,8 @@ export interface TreasureInfo {
 
 export interface HealthBar {
   container: PIXI.Container;
-  redBar: PIXI.Graphics;
+  grapBar: PIXI.Graphics;
+  timeline: gsap.core.Timeline | null;
 }
 
 export interface Message {
@@ -142,9 +144,10 @@ export class Game {
   /**
    * 血条
    */
-  healthBar = {
+  healthBar: HealthBar = {
     container: new PIXI.Container(),
     grapBar: new PIXI.Graphics(),
+    timeline: null,
   };
 
   /**
@@ -271,7 +274,7 @@ export class Game {
    * 创建血条
    */
   private createHealthBar() {
-    this.healthBar.container.position.set(this.app.stage.width - 170, 4);
+    this.healthBar.container.position.set(this.app.stage.width - 100, 10);
     this.gameUIScene.addChild(this.healthBar.container);
 
     /**
@@ -291,6 +294,11 @@ export class Game {
     this.healthBar.grapBar.drawRect(0, 0, 128, 8);
     this.healthBar.grapBar.endFill();
     this.healthBar.container.addChild(this.healthBar.grapBar);
+    this.healthBar.container.pivot.set(
+      this.healthBar.container.width / 2,
+      this.healthBar.container.height / 2
+    );
+
     return this.healthBar;
   }
 
@@ -347,7 +355,8 @@ export class Game {
       if (
         this.player.target &&
         hitTestRectangle(this.player.target, monster) &&
-        !this.player.beingAttacked
+        !this.player.beingAttacked &&
+        !this.player.die
       ) {
         this.player.beingAttacked = true;
         this.player.curHealth -= randomNum(
@@ -356,6 +365,7 @@ export class Game {
         );
         const hr = this.player.curHealth / this.player.health;
         this.healthBar.grapBar.width = this.healthBar.grapBar.width * hr;
+        this.shakeHealthBar(this.healthBar.container);
         if (hr < 0) {
           this.healthBar.grapBar.width = 0;
           if (this.messages.full) {
@@ -372,6 +382,21 @@ export class Game {
         }, this.monster.attackInterval);
       }
     });
+  }
+
+  private shakeHealthBar(healthBar: PIXI.Container) {
+    if (!this.healthBar.timeline) {
+      this.healthBar.timeline = gsap.timeline();
+      this.healthBar.timeline.to(healthBar, {
+        rotation: (10 * Math.PI) / 180,
+        duration: 0.06,
+        repeat: 1,
+        yoyo: true,
+        onComplete: () => {
+          this.healthBar.timeline = null;
+        },
+      });
+    }
   }
 
   setPlayerOffset(
