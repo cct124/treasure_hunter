@@ -56,18 +56,48 @@ export interface MonsterInfo {
 }
 
 export interface PlayerInfo {
+  /**
+   * 玩家对象
+   */
   target?: Player;
+  /**
+   * x偏移
+   */
   offsetX: number;
+  /**
+   * y偏移
+   */
   offsetY: number;
+  /**
+   * 移动速度
+   */
   speed: number;
+  /**
+   * 血量
+   */
   health: number;
+  /**
+   * 当前血量
+   */
   curHealth: number;
+  /**
+   * 是否正在被攻击
+   */
   beingAttacked: boolean;
+  /**
+   * 死亡
+   */
   die: boolean;
 }
 
 export interface TreasureInfo {
+  /**
+   * 宝箱对象
+   */
   target?: Treasure;
+  /**
+   * 玩家是否触碰到宝箱
+   */
   hit: boolean;
 }
 
@@ -159,6 +189,9 @@ export class Game {
     victoryText: "Victory!",
   };
 
+  /**
+   * 玩家对象信息
+   */
   player: PlayerInfo = {
     target: undefined,
     offsetX: 0,
@@ -229,6 +262,7 @@ export class Game {
       this.app.view.height / 2 - this.treasure.target.sprite.height / 2
     );
 
+    // 将各种对象绘制到舞台中
     this.app.stage.addChild(this.gameScene);
     this.app.stage.addChild(this.gameUIScene);
     this.gameScene.addChild(this.dungeon);
@@ -384,6 +418,10 @@ export class Game {
     });
   }
 
+  /**
+   * 抖动血条
+   * @param healthBar
+   */
   private shakeHealthBar(healthBar: PIXI.Container) {
     if (!this.healthBar.timeline) {
       this.healthBar.timeline = gsap.timeline();
@@ -399,6 +437,12 @@ export class Game {
     }
   }
 
+  /**
+   * 设置玩家偏移量
+   * @param offsetX
+   * @param offsetY
+   * @returns
+   */
   setPlayerOffset(
     offsetX: number,
     offsetY: number
@@ -435,6 +479,10 @@ export class Game {
     return this.player.target;
   }
 
+  /**
+   * 检测是否碰撞宝箱
+   * @returns
+   */
   private checkTreasure() {
     if (!this.player.target || !this.treasure.target) return;
     if (this.treasure.hit && !this.player.die) {
@@ -446,6 +494,10 @@ export class Game {
       this.treasure.hit = true;
     }
   }
+  /**
+   * 检测是否碰撞门
+   * @returns
+   */
   private checkDoor() {
     if (!this.player.target) return;
     if (this.treasure.hit && hitTestRectangle(this.player.target, this.door)) {
@@ -455,6 +507,9 @@ export class Game {
     }
   }
 
+  /**
+   * 每帧生成回调
+   */
   private ticker(delta: number) {
     // console.log(delta);
     this.monsterMove();
@@ -551,6 +606,9 @@ export class Player extends Sprite {
   }
 }
 
+/**
+ * 宝箱
+ */
 export class Treasure extends Sprite {
   constructor({
     textures,
@@ -563,6 +621,9 @@ export class Treasure extends Sprite {
   }
 }
 
+/**
+ * 门
+ */
 export class Door extends Sprite {
   constructor({
     textures,
@@ -629,6 +690,12 @@ export function contain(
   }
 }
 
+/**
+ * 碰撞检测
+ * @param r1
+ * @param r2
+ * @returns
+ */
 export function hitTestRectangle(r1: Sprite, r2: Sprite): boolean {
   //Define the variables we'll need to calculate
   let hit;
